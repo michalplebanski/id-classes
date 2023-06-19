@@ -1,5 +1,11 @@
+import sys
+import logging
 from faker import Faker
+
 faker = Faker()
+
+private_id = []
+company_id = []
 
 class Id:
   def __init__(self, name, company, job, e_mail):
@@ -8,27 +14,60 @@ class Id:
     self.job = job
     self.e_mail = e_mail
 
-  def __str__(self):
-    return f'{self.name} {self.company} {self.job} {self.e_mail}'
-
   def __repr__(self):
     return f'{self.name} {self.company} {self.job} {self.e_mail}'
 
-  def contact(person):
-    return f"Kontaktuję się z {person}"
+class BaseContact(Id):
+    def __init__(self, private_phone, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.private_phone = private_phone
 
+    def contact(self):
+        return f"Wybieram numer {self.private_phone} i dzwonię do {self.name}"
 
-name_1 = Id(name=faker.name(), company="Widoczni", job="Expert", e_mail="mp@gmail.com")
-name_2 = Id(name=faker.name(), company="Plus", job="Leader", e_mail="mg@gmail.com")
-name_3 = Id(name=faker.name(), company="Icea", job="Senior", e_mail="mk@gmail.com")
-name_4 = Id(name=faker.name(), company="Verseo", job="Mid", e_mail="jt@gmail.com")
-name_5 = Id(name=faker.name(), company="Tense", job="Junior", e_mail="nn@gmail.com")
+    def name_length(self):
+        name_given = len(self.name)
+        return f"Długość imienia i nazwiska to: {name_given}"
 
-list_id = [name_1, name_2, name_3, name_4, name_5]
+class BusinessContact(Id):
+    def __init__(self, company_phone, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.company_phone = company_phone
 
-for person in list_id:
-  print(Id.contact(person))
+    def contact(self):
+        return f"Wybieram numer {self.company_phone} i dzwonię do {self.name}"
 
-sorted_id_name = sorted(list_id, key=lambda x: x.name)
-sorted_id_email = sorted(list_id, key=lambda x: x.e_mail)
+    def name_length(self):
+        name_given = len(self.name)
+        return f"Długość imienia i nazwiska to: {name_given}"
 
+def create_contacts(type, number):
+    if type == "private":
+        for single_id in range(1, int(number)):
+            single_id = BaseContact(name=faker.name(), company=faker.word(), job=faker.job(), e_mail=faker.email(), private_phone=faker.phone_number())
+            private_id.append(single_id)
+            for item in private_id:
+                print(f"Imię i nazwisko: {item.name}, Firma: {item.company}, Stanowisko: {item.job}, E-mail:{item.e_mail}, Telefon prywatny: {item.private_phone} \n")
+
+    elif type == "company":
+        for single_id in range(1, int(number)):
+            single_id = BusinessContact(name=faker.name(), company=faker.word(), job=faker.job(), e_mail=faker.email(), company_phone=faker.phone_number())
+            company_id.append(single_id)
+            for item in company_id:
+                print(f"Imię i nazwisko: {item.name}, Firma: {item.company}, Stanowisko: {item.job}, E-mail:{item.e_mail}, Telefon prywatny: {item.company_phone} \n")
+
+def validation_number(number):
+    try:
+        int(number)
+    except:
+        logging.warning("Nie podano cyfry!")
+        exit(1)
+
+if __name__ == "__main__":
+    type_of_id = input("Jaką wizytówkę chcesz stworzyć? Wpisz: 'private' or 'company: '")
+    if type_of_id != "private" and type_of_id != "company":
+        logging.warning("Podano zły typ wizytówki!")
+        exit(1)
+    number_of_id = input("Ile wizytówek chcesz stworzyć? ")
+    validation_number(number_of_id)
+    create_contacts(type_of_id, number_of_id)
